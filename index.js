@@ -52,6 +52,19 @@ app.delete('/api/persons/:id', (request, response) => {
   response.status(204).end()
 })
 
+app.post('/api/persons', (request, response) => {
+  const randomId = Math.floor(Math.random() * 999)
+  const person = {
+    id: randomId,
+    name: request.body.name,
+    number: request.body.number
+  }
+
+  persons = persons.concat(person)
+  response.status(201)
+  response.json(person)
+})
+
 app.get('/info', (request, response) => {
   const dateNow = new Date(Date.now()).toString()
   const responseText = `
