@@ -31,8 +31,19 @@ let persons = [
     }
 ]
 
+
 app.use(express.json())
-app.use(morgan('tiny'))
+morgan.token('reqBody', function (req, res) {
+  let postBody = {
+    name: "",
+    number: ""
+  }
+  postBody.name = req.body.name;
+  postBody.number = req.body.number;
+  return JSON.stringify(postBody)
+})
+
+app.use(morgan(':method :url :status :res[content-length] - :response-time ms :reqBody'))
 
 app.get('/api/persons', (request, response) => {
   response.json(persons)
