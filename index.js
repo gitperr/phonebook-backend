@@ -21,7 +21,7 @@ morgan.token('reqBody', function (req, res) {
 
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :reqBody'))
 
-app.get('/api/persons', (request, response) => {
+app.get('/api/persons', (request, response, next) => {
   let persons = []
   Person.find({}).then(result => {
     result.forEach(person => {
@@ -29,6 +29,7 @@ app.get('/api/persons', (request, response) => {
     })
     response.json(persons)
   })
+  .catch(error => next(error))
 })
 
 app.get('/api/persons/:id', (request, response, next) => {
@@ -50,7 +51,7 @@ app.delete('/api/persons/:id', (request, response, next) => {
     .catch(error => next(error))
 })
 
-app.post('/api/persons', (request, response) => {
+app.post('/api/persons', (request, response, next) => {
   if (!request.body.name) {
     return response.status(400).json({
       error: 'name missing'
@@ -74,6 +75,7 @@ app.post('/api/persons', (request, response) => {
       response.status(201)
       response.json(savedPerson)
     })
+    .catch(error => next(error))
 })
 
 const errorHandler = (error, request, response, next) => {
