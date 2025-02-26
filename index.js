@@ -22,12 +22,8 @@ morgan.token('reqBody', function (req, res) {
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :reqBody'))
 
 app.get('/api/persons', (request, response, next) => {
-  let persons = []
   Person.find({}).then(result => {
-    result.forEach(person => {
-      persons = persons.concat(person)
-    })
-    response.json(persons)
+    response.json(result)
   })
   .catch(error => next(error))
 })
@@ -101,8 +97,14 @@ const errorHandler = (error, request, response, next) => {
   next(error)
 }
 
-app.get('/info', (request, response) => {
+app.get('/info', (request, response, next) => {
   const dateNow = new Date(Date.now()).toString()
+
+  Person.find({}).then(result => {
+    persons = result
+  })
+  .catch(error => next(error))
+
   const responseText = `
   <p>Phonebook has info for ${persons.length} people</p>
   <p>${dateNow}</p>
