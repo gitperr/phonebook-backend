@@ -104,14 +104,14 @@ app.get('/info', (request, response, next) => {
 
   Person.find({}).then(result => {
     persons = result
+    const responseText = `
+    <p>Phonebook has info for ${persons.length} people</p>
+    <p>${dateNow}</p>
+    `
+    response.send(responseText)
   })
   .catch(error => next(error))
 
-  const responseText = `
-  <p>Phonebook has info for ${persons.length} people</p>
-  <p>${dateNow}</p>
-  `
-  response.send(responseText)
 })
 
 app.use(errorHandler)
