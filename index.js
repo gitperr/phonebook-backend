@@ -21,7 +21,7 @@ morgan.token('reqBody', function (req) {
 
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :reqBody'))
 
-app.get('/api/persons', (response, next) => {
+app.get('/api/persons', (request, response, next) => {
   Person.find({}).then(result => {
     response.json(result)
   })
