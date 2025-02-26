@@ -1,7 +1,9 @@
+require('dotenv').config()
 const express = require('express')
 const app = express()
 const cors = require('cors')
 var morgan = require('morgan')
+const Person = require('./models/person')
 
 let persons = [
   { 
@@ -49,18 +51,27 @@ morgan.token('reqBody', function (req, res) {
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :reqBody'))
 
 app.get('/api/persons', (request, response) => {
-  response.json(persons)
+  let persons = []
+  Person.find({}).then(result => {
+    result.forEach(person => {
+      persons = persons.concat(person)
+    })
+    response.json(persons)
+  })
 })
 
 app.get('/api/persons/:id', (request, response) => {
-  const person = persons.find(person => person.id === request.params.id)
-
-  if (person) {
-    return response.json(person)
-  } else {
-    response.status(404)
-    return response.send('No person found with this id.')
-  }
+  Person.findById(request.params.id)
+  .then(person => {
+    if (!person) {
+      return response.status(404).json({ error: 'Person not found' })
+    }
+    response.json(person)
+  })
+  .catch(error => {
+    console.error('Error fetching person:', error)
+    response.status(400).send({ error: 'malformed id' })
+  });
 })
 
 app.delete('/api/persons/:id', (request, response) => {
