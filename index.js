@@ -33,10 +33,9 @@ let persons = [
   }
 ]
 
-
 app.use(cors())
-app.use(express.json())
 app.use(express.static('dist'))
+app.use(express.json())
 morgan.token('reqBody', function (req, res) {
   let postBody = {
     name: "",
@@ -60,7 +59,7 @@ app.get('/api/persons', (request, response) => {
   })
 })
 
-app.get('/api/persons/:id', (request, response) => {
+app.get('/api/persons/:id', (request, response, next) => {
   Person.findById(request.params.id)
   .then(person => {
     if (!person) {
@@ -68,10 +67,7 @@ app.get('/api/persons/:id', (request, response) => {
     }
     response.json(person)
   })
-  .catch(error => {
-    console.error('Error fetching person:', error)
-    response.status(400).send({ error: 'malformed id' })
-  });
+  .catch(error => next(error));
 })
 
 app.delete('/api/persons/:id', (request, response) => {
@@ -106,6 +102,16 @@ app.post('/api/persons', (request, response) => {
     })
 })
 
+const errorHandler = (error, request, response, next) => {
+  console.error(error.message)
+
+  if (error.name === 'CastError') {
+    return response.status(400).send({ error: 'malformatted id' })
+  } 
+
+  next(error)
+}
+
 app.get('/info', (request, response) => {
   const dateNow = new Date(Date.now()).toString()
   const responseText = `
@@ -115,6 +121,7 @@ app.get('/info', (request, response) => {
   response.send(responseText)
 })
 
+app.use(errorHandler)
 const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
